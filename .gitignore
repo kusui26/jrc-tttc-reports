@@ -1,0 +1,10 @@
+# node
+node_modules/
+frontend/node_modules/
+
+# 環境ファイル
+.env
+.DS_Store
+
+# 大きい元CSVは除外（任意）
+data/processed/

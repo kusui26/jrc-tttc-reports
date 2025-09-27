@@ -1,0 +1,6 @@
+# GitにはあるがHeroku slugには不要なもの
+frontend/
+data/
+tttc/
+*.md
+*.ipynb

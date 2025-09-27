@@ -1,0 +1,29 @@
+{
+    "datasets": [
+        {
+            "key": "jan",
+            "input_csv": "data/processed/merged_for_tttc_jan.csv"
+        },
+        {
+            "key": "en",
+            "input_csv": "data/processed/merged_for_tttc_en.csv"
+        }
+    ],
+    "columns": {
+        "id": "id",
+        "text_display": "text_display",
+        "text_raw": "text_raw",
+        "date": "date",
+        "url": "url",
+        "cluster_id": "cluster_id",
+        "cluster_label": "cluster_label",
+        "cluster_summary": "cluster_summary",
+        "x": "x",
+        "y": "y"
+    },
+    "ui": {
+        "title": "TTTC Reports",
+        "subtitle": "ブロードリスニング可視化（東海道新幹線）",
+        "pointSize": 6
+    }
+}
