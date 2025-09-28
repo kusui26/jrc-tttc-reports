@@ -75,7 +75,7 @@ const subtitleWithPeriod = computed(() => {
     dataset.value === "jan"
       ? "2025-08-07--2025-08-12"
       : "2025-08-10--2025-09-08";
-  return base ? `${base} （期間：${period}）` : `期間：${period}`;
+  return base ? `${base} 期間：${period}` : `期間：${period}`;
 });
 
 const reKeyword = computed(() => {
