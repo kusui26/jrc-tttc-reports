@@ -7,17 +7,28 @@ const PUBLIC_DIR = path.join(__dirname, "public");
 const DATA_DIR = path.join(PUBLIC_DIR, "data");
 const APP_DIR = path.join(PUBLIC_DIR, "app");
 
-// /data は常に最新（キャッシュ不可）＋ fallthrough: false で 404 を返す
-app.use("/data",
+// /data は常に最新（キャッシュ不可）
+app.use(
+    "/data",
     (req, res, next) => { res.setHeader("Cache-Control", "no-store"); next(); },
     express.static(DATA_DIR, { fallthrough: false })
 );
 
-// フロント（Vue ビルド物）
-app.use(express.static(APP_DIR, { maxAge: "1d", etag: true }));
+// フロント（ビルド成果物）
+// ※ HTML は no-store、その他(assets等)は1日キャッシュ
+app.use(express.static(APP_DIR, {
+    etag: true,
+    maxAge: "1d",
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".html")) {
+            res.setHeader("Cache-Control", "no-store");
+        }
+    }
+}));
 
-// 最後に SPA フォールバック（※ /data には届かない）
-app.use((_req, res) => {
+// SPA フォールバック（任意パス → index.html）も no-store
+app.get("*", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
     res.sendFile(path.join(APP_DIR, "index.html"));
 });
 
