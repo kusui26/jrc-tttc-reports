@@ -22,8 +22,8 @@
         "y": "y"
     },
     "ui": {
-        "title": "TTTC Reports",
-        "subtitle": "ブロードリスニング可視化（東海道新幹線）",
+        "title": "ブロードリスニング×ツイート",
+        "subtitle": "東海道新幹線やJR東海に関するお客様の声の可視化",
         "pointSize": 6
     }
 }

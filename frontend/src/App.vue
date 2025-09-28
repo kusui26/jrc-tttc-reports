@@ -3,7 +3,7 @@
   <div>
     <header style="padding:12px 16px;border-bottom:1px solid #eee">
       <h1 style="margin:0;font-size:18px">{{ meta.title }}</h1>
-      <div style="color:#666">{{ meta.subtitle }}</div>
+      <div style="color:#666">{{ subtitleWithPeriod }}</div>
     </header>
 
     <div style="display:flex;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #eee">
@@ -68,6 +68,15 @@ const searchPlaceholder = computed(() =>
     ? "e.g., delay OR onboard sales"
     : "例: 遅延 OR 車内販売"
 );
+
+const subtitleWithPeriod = computed(() => {
+  const base = meta.value.subtitle || "";
+  const period =
+    dataset.value === "jan"
+      ? "2025-08-07--2025-08-12"
+      : "2025-08-10--2025-09-08";
+  return base ? `${base} （期間：${period}）` : `期間：${period}`;
+});
 
 const reKeyword = computed(() => {
   const kw = keyword.value.trim();
@@ -161,4 +170,3 @@ watch(dataset, async () => {
 // フィルタや検索が変わったら再描画
 watch([filtered, filterCluster, keyword], draw);
 </script>
-
