@@ -45,9 +45,14 @@ async function buildOneDataset({ key, input_csv }, cfg) {
         };
         e.size++;
         if (e.examples.length < 5 && d.text_display) e.examples.push(d.text_display);
+        if (!e.cluster_summary && d.cluster_summary) e.cluster_summary = d.cluster_summary;
         cmap.set(keyId, e);
     }
     const clusters = [...cmap.values()].sort((a, b) => b.size - a.size);
+
+    for (const cl of clusters) {
+        if (!cl.cluster_summary) delete cl.cluster_summary;
+    }
 
     // 色（大きい -1 には色、閾値未満の -1 はグレー）
     const total = data.length;
@@ -69,7 +74,9 @@ async function buildOneDataset({ key, input_csv }, cfg) {
     };
 
     await fs.ensureDir(outDir);
-    await fs.writeJson(`${outDir}/data.json`, data);
+    const dataForExport = data.map(({ cluster_summary, ...rest }) => rest);
+
+    await fs.writeJson(`${outDir}/data.json`, dataForExport);
     await fs.writeJson(`${outDir}/clusters.json`, clusters);
     await fs.writeJson(`${outDir}/meta.json`, meta);
 

@@ -1,8 +1,1 @@
-{
-    "title": "ブロードリスニング×ツイート",
-    "subtitle": "東海道新幹線のお客様の声の可視化",
-    "rows_total": 15698,
-    "clusters_total": 24,
-    "dataset_key": "jan",
-    "generated_at": "2025-09-27T13:06:59.175Z"
-}
+{"title":"ブロードリスニング×ツイート","subtitle":"東海道新幹線のお客様の声の可視化","rows_total":15698,"clusters_total":24,"dataset_key":"jan","generated_at":"2025-10-04T13:52:55.588Z"}

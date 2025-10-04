@@ -52,8 +52,19 @@
 </template>
 
 <script setup>
-import Plotly from "plotly.js-dist-min";
 import { ref, computed, onMounted, watch } from "vue";
+
+let plotlyLoader;
+const loadPlotly = () => {
+  if (!plotlyLoader) {
+    plotlyLoader = import("plotly.js-dist-min").then((mod) => mod.default ?? mod);
+  }
+  return plotlyLoader;
+};
+
+let drawPromise = null;
+let drawRequested = false;
+let clickBound = false;
 
 const meta = ref({ title: "TTTC Reports", subtitle: "" });
 const data = ref([]);
@@ -101,44 +112,66 @@ const colorFor = (cid) => {
   return m?.color || "#9aa1a7";
 };
 
-function draw() {
-  const xs = filtered.value.map((d) => d.x);
-  const ys = filtered.value.map((d) => d.y);
-  const colors = filtered.value.map((d) => colorFor(d.cluster_id));
-  const text = filtered.value.map((d) => d.text_display);
-  const custom = filtered.value.map((d) => [
-    d.id,
-    d.url,
-    d.date,
-    d.cluster_label,
-  ]);
+async function draw() {
+  if (drawPromise) {
+    drawRequested = true;
+    return drawPromise;
+  }
 
-  const trace = {
-    x: xs,
-    y: ys,
-    text,
-    customdata: custom,
-    mode: "markers",
-    type: "scattergl",
-    marker: { size: 6, opacity: 0.85, color: colors },
-    hovertemplate:
-      "<b>%{customdata[3]}</b><br>id: %{customdata[0]}<br>%{text}<br>%{customdata[2]}<extra></extra>",
-  };
-  const layout = {
-    margin: { l: 20, r: 10, t: 10, b: 30 },
-    xaxis: { showgrid: false, showticklabels: false, zeroline: false },
-    yaxis: { showgrid: false, showticklabels: false, zeroline: false },
-  };
-  Plotly.react("plot", [trace], layout, {
-    displayModeBar: true,
-    responsive: true,
-  });
+  const execute = async () => {
+    const Plotly = await loadPlotly();
 
-  const plot = document.getElementById("plot");
-  plot.on("plotly_click", (ev) => {
-    const url = ev?.points?.[0]?.customdata?.[1];
-    if (url) window.open(url, "_blank");
-  });
+    const xs = filtered.value.map((d) => d.x);
+    const ys = filtered.value.map((d) => d.y);
+    const colors = filtered.value.map((d) => colorFor(d.cluster_id));
+    const text = filtered.value.map((d) => d.text_display);
+    const custom = filtered.value.map((d) => [
+      d.id,
+      d.url,
+      d.date,
+      d.cluster_label,
+    ]);
+
+    const trace = {
+      x: xs,
+      y: ys,
+      text,
+      customdata: custom,
+      mode: "markers",
+      type: "scattergl",
+      marker: { size: 6, opacity: 0.85, color: colors },
+      hovertemplate:
+        "<b>%{customdata[3]}</b><br>id: %{customdata[0]}<br>%{text}<br>%{customdata[2]}<extra></extra>",
+    };
+    const layout = {
+      margin: { l: 20, r: 10, t: 10, b: 30 },
+      xaxis: { showgrid: false, showticklabels: false, zeroline: false },
+      yaxis: { showgrid: false, showticklabels: false, zeroline: false },
+    };
+
+    await Plotly.react("plot", [trace], layout, {
+      displayModeBar: true,
+      responsive: true,
+    });
+
+    if (!clickBound) {
+      const plot = document.getElementById("plot");
+      plot?.on("plotly_click", (ev) => {
+        const url = ev?.points?.[0]?.customdata?.[1];
+        if (url) window.open(url, "_blank");
+      });
+      clickBound = true;
+    }
+  };
+
+  drawRequested = false;
+  drawPromise = execute();
+  try {
+    await drawPromise;
+  } finally {
+    drawPromise = null;
+    if (drawRequested) return draw();
+  }
 }
 
 async function loadDataset(key) {
@@ -155,18 +188,24 @@ async function loadDataset(key) {
 
 // 初期表示
 onMounted(async () => {
+  const plotlyReady = loadPlotly();
   await loadDataset(dataset.value);
-  draw();
+  await plotlyReady;
+  await draw();
 });
 
 // データセット変更 → 再読込＆フィルタ初期化 → 描画
 watch(dataset, async () => {
   filterCluster.value = "__ALL__";
   keyword.value = "";
+  const plotlyReady = loadPlotly();
   await loadDataset(dataset.value);
-  draw();
+  await plotlyReady;
+  await draw();
 });
 
 // フィルタや検索が変わったら再描画
-watch([filtered, filterCluster, keyword], draw);
+watch([filtered, filterCluster, keyword], () => {
+  void draw();
+});
 </script>
